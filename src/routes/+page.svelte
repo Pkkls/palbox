@@ -20,6 +20,18 @@
     !ready ? "loading" : !dockerReady ? "docker" : !runtime.exists ? "setup" : "dashboard"
   );
 
+  // Hand-picked comfort / quality-of-life mods (client-side, installed by each
+  // player). Curated to exclude cheat/boost mods; all links verified on Nexus.
+  const NEXUS = "https://www.nexusmods.com/palworld/mods/";
+  const recommendedMods = [
+    { name: "MapUnlocker", tag: "Map", id: "16", desc: "Reveals the full map from the start so you can plan routes. You still unlock fast-travel points normally." },
+    { name: "Pal Analyzer", tag: "Interface", id: "336", desc: "Shows a Pal's stats, passive skills and work suitability at a glance." },
+    { name: "No Food Decay", tag: "Comfort", id: "89", desc: "Stored food stops spoiling, so no more pantry micromanagement." },
+    { name: "Remove Flying Stamina Cost", tag: "Comfort", id: "13", desc: "Flying mounts no longer drain stamina, for smoother exploration." },
+    { name: "AlwaysFastTravel", tag: "Convenience", id: "96", desc: "Fast travel from anywhere, not only from unlocked statues." },
+    { name: "Ghibli Style Preset", tag: "Visual", id: "2", desc: "A softer, Ghibli-like colour palette. Pure visual comfort." },
+  ];
+
   function notify(msg) {
     toast = msg;
     setTimeout(() => (toast = ""), 3200);
@@ -221,6 +233,7 @@
         <button class={tab === "overview" ? "on" : ""} onclick={() => (tab = "overview")}>Overview</button>
         <button class={tab === "players" ? "on" : ""} onclick={() => (tab = "players")}>Players</button>
         <button class={tab === "settings" ? "on" : ""} onclick={() => (tab = "settings")}>Settings</button>
+        <button class={tab === "mods" ? "on" : ""} onclick={() => (tab = "mods")}>Mods</button>
         <button class={tab === "logs" ? "on" : ""} onclick={() => (tab = "logs")}>Logs</button>
       </nav>
       <div class="state">
@@ -342,6 +355,28 @@
         </section>
       {/if}
 
+      {#if tab === "mods"}
+        <header class="head"><div><h1>Recommended mods</h1><p class="sub">Comfort &amp; quality-of-life picks, no cheats</p></div>
+          <button onclick={() => openUrl('https://www.nexusmods.com/games/palworld/mods?categoryName=User+Interface')}>Browse Nexus</button></header>
+        <section class="card note">
+          <b>Read this first.</b> These are <b>client-side</b> mods: a dedicated server can't push them to players. Each person installs them on their own PC from Nexus. Everything here is picked for comfort and quality of life, nothing that gives an unfair advantage.
+        </section>
+        <section class="card">
+          <div class="card-title">Start here: curated collection</div>
+          <p class="sub2">A community-maintained bundle of QoL &amp; extras, a good one-stop starting point.</p>
+          <button class="primary" onclick={() => openUrl('https://www.nexusmods.com/games/palworld/collections/6br46x')}>Open the “QoL &amp; Extras” collection</button>
+        </section>
+        <div class="mods">
+          {#each recommendedMods as mod}
+            <div class="mod">
+              <div class="mod-top"><span class="mod-name">{mod.name}</span><span class="mod-tag">{mod.tag}</span></div>
+              <p class="mod-desc">{mod.desc}</p>
+              <button class="link" onclick={() => openUrl(NEXUS + mod.id)}>View on Nexus →</button>
+            </div>
+          {/each}
+        </div>
+      {/if}
+
       {#if tab === "logs"}
         <header class="head"><div><h1>Logs</h1><p class="sub">Last 300 lines</p></div>
           <button onclick={refreshLogs}>Refresh</button></header>
@@ -446,6 +481,17 @@
     margin-bottom: 16px; }
   .card-title { font-weight: 700; margin-bottom: 12px; }
   .card.tunnel { border-color: color-mix(in srgb, var(--green) 30%, var(--line)); }
+  .card.note { background: var(--surface-2); border-color: transparent; font-size: 14px; line-height: 1.55; }
+  .sub2 { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+  .mods { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .mod { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px;
+    display: flex; flex-direction: column; gap: 8px; }
+  .mod-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .mod-name { font-weight: 700; }
+  .mod-tag { font-family: var(--mono); font-size: 11px; color: var(--green); background: var(--green-soft);
+    padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .mod-desc { margin: 0; font-size: 13.5px; color: var(--muted); flex: 1; }
+  .mod .link { align-self: flex-start; padding: 0; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .row.end { justify-content: space-between; margin-top: 16px; }
   .row input { flex: 1; min-width: 160px; }
@@ -472,7 +518,7 @@
 
   @media (max-width: 760px) {
     .app { grid-template-columns: 1fr; }
-    .grid, .mode { grid-template-columns: 1fr; }
+    .grid, .mode, .mods { grid-template-columns: 1fr; }
     aside { flex-direction: row; align-items: center; }
     nav { flex-direction: row; }
     .state { margin: 0 0 0 auto; }
