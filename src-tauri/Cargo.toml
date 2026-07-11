@@ -1,0 +1,21 @@
+[package]
+name = "palbox"
+version = "0.1.0"
+description = "One-click Palworld dedicated server, without exposing your IP"
+authors = ["PalBox contributors"]
+edition = "2021"
+
+[lib]
+# The `_lib` suffix keeps the lib name unique so it doesn't clash with the bin
+# name on Windows (see rust-lang/cargo#8519).
+name = "palbox_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
