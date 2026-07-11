@@ -247,26 +247,29 @@
 
         <section class="card tunnel">
           <div class="card-title">🔒 Safe access</div>
-          {#if tunnel.running}
-            {#if tunnel.claimUrl}
-              <p>One-time setup: claim your free tunnel to activate it.</p>
-              <div class="row">
-                <button class="primary" onclick={() => openUrl(tunnel.claimUrl)}>Open claim link</button>
-                <button onclick={() => copy(tunnel.claimUrl)}>Copy link</button>
-              </div>
-            {:else if tunnel.address}
-              <p>Share this address with your friends — nothing to configure on their side:</p>
-              <div class="addr">
-                <code>{tunnel.address}</code>
-                <button onclick={() => copy(tunnel.address)}>Copy</button>
-              </div>
-            {:else}
-              <p>{tunnel.message}</p>
-            {/if}
+          {#if tunnel.running && tunnel.address}
+            <p>Share this address with your friends — nothing to set up on their side:</p>
+            <div class="addr">
+              <code>{tunnel.address}</code>
+              <button onclick={() => copy(tunnel.address)}>Copy</button>
+            </div>
+            <button class="ghost" onclick={() => run('tunnel', () => invoke('tunnel_stop'))}>Turn off tunnel</button>
+          {:else if tunnel.running}
+            <p>{tunnel.message}</p>
             <button class="ghost" onclick={() => run('tunnel', () => invoke('tunnel_stop'))}>Turn off tunnel</button>
           {:else}
-            <p>The tunnel lets friends join without opening any port — your public IP is never shared.</p>
-            <button class="primary" disabled={busy !== ''} onclick={() => run('tunnel', () => invoke('tunnel_start'))}>Turn on safe tunnel</button>
+            <p>Friends join through a relay, so no port is opened and your public IP stays hidden. This needs a free <b>playit.gg</b> key — a one-time setup.</p>
+            <ol class="steps">
+              <li>On playit.gg, create a free account and a <b>UDP tunnel</b> pointing to <code>host.docker.internal:{settings?.port ?? 8211}</code>, then copy your agent secret key.
+                <div><button class="link" onclick={() => openUrl('https://playit.gg')}>Open playit.gg</button></div></li>
+              <li>Paste the secret key here:
+                <div class="row">
+                  <input placeholder="playit secret key" bind:value={settings.playitSecret} />
+                  <button onclick={() => run('savekey', () => invoke('save_settings', { settings }))}>Save</button>
+                </div>
+              </li>
+            </ol>
+            <button class="primary" disabled={busy !== '' || !settings?.playitSecret} onclick={() => run('tunnel', () => invoke('tunnel_start'))}>Turn on safe tunnel</button>
           {/if}
         </section>
 
@@ -446,6 +449,12 @@
   .addr { display: flex; gap: 8px; align-items: center; background: var(--bg); border: 1px solid var(--line);
     border-radius: 10px; padding: 8px 8px 8px 14px; margin: 6px 0 12px; }
   .addr code { flex: 1; font-family: var(--mono); font-size: 15px; }
+  .steps { margin: 6px 0 14px; padding-left: 18px; display: flex; flex-direction: column; gap: 10px;
+    font-size: 14px; line-height: 1.5; }
+  .steps code { font-family: var(--mono); font-size: 12.5px; background: var(--bg); border: 1px solid var(--line);
+    padding: 1px 5px; border-radius: 5px; }
+  .steps .row { margin-top: 6px; }
+  button.link { background: transparent; border: none; color: var(--green); padding: 4px 0; font-weight: 600; }
 
   table { width: 100%; border-collapse: collapse; }
   th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);

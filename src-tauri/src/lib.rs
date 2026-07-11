@@ -17,8 +17,6 @@ struct AppPaths {
     /// Bind-mounted into the container as /palworld (world saves, config).
     server_dir: PathBuf,
     settings_file: PathBuf,
-    /// playit agent config lives under here.
-    data_dir: PathBuf,
 }
 
 #[derive(Serialize, Clone, Debug)]
@@ -197,8 +195,8 @@ async fn save_world(paths: State<'_, AppPaths>) -> Result<String, String> {
 
 #[tauri::command]
 async fn tunnel_start(paths: State<'_, AppPaths>) -> Result<(), String> {
-    let dir = paths.data_dir.clone();
-    spawn_blocking(move || tunnel::start(&dir))
+    let secret = read_settings(&paths.settings_file).playit_secret;
+    spawn_blocking(move || tunnel::start(&secret))
         .await
         .map_err(|e| e.to_string())?
 }
@@ -226,7 +224,6 @@ pub fn run() {
             app.manage(AppPaths {
                 server_dir: data_dir.join("server"),
                 settings_file: data_dir.join("settings.json"),
-                data_dir,
             });
             Ok(())
         })

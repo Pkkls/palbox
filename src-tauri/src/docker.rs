@@ -178,19 +178,23 @@ pub fn remove() -> Result<(), String> {
 }
 
 pub fn logs(lines: u32) -> String {
-    let (_, out, err) = docker(&[
+    let (ok, out, err) = docker(&[
         "logs",
         "--tail",
         &lines.to_string(),
         CONTAINER_NAME,
     ]);
-    // Docker writes container stdout to our stderr for `logs`; merge both.
-    if out.is_empty() {
-        err
-    } else if err.is_empty() {
-        out
-    } else {
-        format!("{out}\n{err}")
+    if !ok {
+        // Container missing or docker error — surface it, don't pass it off as logs.
+        return if err.is_empty() { out } else { err };
+    }
+    // `docker logs` splits the container's stdout/stderr across our two streams;
+    // Palworld writes almost everything to stdout, so order holds in practice.
+    // ponytail: perfect interleaving would need a shared 2>&1 pipe, not worth it here.
+    match (out.is_empty(), err.is_empty()) {
+        (true, false) => err,
+        (false, false) => format!("{out}\n{err}"),
+        _ => out,
     }
 }
 

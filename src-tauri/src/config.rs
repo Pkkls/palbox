@@ -31,6 +31,9 @@ pub struct ServerSettings {
     pub rcon_port: u16,
     /// "tunnel" (safe, via relay) or "direct" (port-forward, IP exposed).
     pub tunnel_mode: String,
+    /// playit.gg agent secret key (from the user's free account). Empty until set.
+    #[serde(default)]
+    pub playit_secret: String,
 }
 
 impl Default for ServerSettings {
@@ -54,6 +57,7 @@ impl Default for ServerSettings {
             port: 8211,
             rcon_port: 25575,
             tunnel_mode: "tunnel".into(),
+            playit_secret: String::new(),
         }
     }
 }
@@ -90,7 +94,8 @@ impl ServerSettings {
                 "ENABLE_PLAYER_TO_PLAYER_DAMAGE".into(),
                 bool_str(self.pvp),
             ),
-            ("PVP".into(), bool_str(self.pvp)),
+            // The image's PvP-mode flag is IS_PVP (not PVP, which it never reads).
+            ("IS_PVP".into(), bool_str(self.pvp)),
         ];
         // Flatten into ["-e", "KEY=VALUE", ...].
         let mut args = Vec::with_capacity(env.len() * 2);
