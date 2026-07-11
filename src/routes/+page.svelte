@@ -194,12 +194,12 @@
         </div>
 
         <div class="mode">
-          <div class="mode-opt {settings.tunnelMode === 'tunnel' ? 'active' : ''}" onclick={() => (settings.tunnelMode = 'tunnel')}>
+          <button type="button" class="mode-opt {settings.tunnelMode === 'tunnel' ? 'active' : ''}" onclick={() => (settings.tunnelMode = 'tunnel')}>
             <b>🔒 Safe tunnel</b><span>No port-forward, IP hidden. Recommended.</span>
-          </div>
-          <div class="mode-opt {settings.tunnelMode === 'direct' ? 'active' : ''}" onclick={() => (settings.tunnelMode = 'direct')}>
+          </button>
+          <button type="button" class="mode-opt {settings.tunnelMode === 'direct' ? 'active' : ''}" onclick={() => (settings.tunnelMode = 'direct')}>
             <b>Direct</b><span>Needs router port-forward; exposes your IP.</span>
-          </div>
+          </button>
         </div>
 
         <button class="primary big" disabled={busy !== '' || pulling} onclick={() => run('create', createServer)}>
@@ -398,7 +398,9 @@
 
   .mode { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0 22px; }
   .mode-opt { border: 1.5px solid var(--line); border-radius: 12px; padding: 14px; cursor: pointer;
-    display: flex; flex-direction: column; gap: 3px; transition: border-color .15s, background .15s; }
+    display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left;
+    width: 100%; font: inherit; color: inherit; background: transparent;
+    transition: border-color .15s, background .15s; }
   .mode-opt span { font-size: 12.5px; color: var(--muted); }
   .mode-opt.active { border-color: var(--green); background: var(--green-soft); }
 
@@ -409,7 +411,6 @@
   button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
   button.primary { background: var(--green); color: #fff; border-color: transparent; }
   button.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
-  button.danger.primary, button.primary.danger { background: var(--danger); color: #fff; }
   button.ghost { background: transparent; }
   button.big { width: 100%; padding: 13px; font-size: 15px; }
   .gate-actions { display: flex; gap: 10px; margin-top: 20px; }
