@@ -24,6 +24,8 @@ struct AppPaths {
 struct ServerRuntime {
     exists: bool,
     running: bool,
+    /// Container is up AND the game answers RCON (actually joinable).
+    ready: bool,
     image_ready: bool,
     memory: String,
 }
@@ -108,20 +110,21 @@ async fn delete_server() -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn server_status() -> ServerRuntime {
-    spawn_blocking(|| ServerRuntime {
-        exists: docker::container_exists(),
-        running: docker::container_running(),
-        image_ready: docker::image_present(),
-        memory: docker::mem_usage().unwrap_or_default(),
+async fn server_status(paths: State<'_, AppPaths>) -> Result<ServerRuntime, String> {
+    let (port, pw) = rcon_conn(&paths);
+    let rt = spawn_blocking(move || {
+        let running = docker::container_running();
+        ServerRuntime {
+            exists: docker::container_exists(),
+            running,
+            ready: running && rcon::ready("127.0.0.1", port, &pw),
+            image_ready: docker::image_present(),
+            memory: docker::mem_usage().unwrap_or_default(),
+        }
     })
     .await
-    .unwrap_or(ServerRuntime {
-        exists: false,
-        running: false,
-        image_ready: false,
-        memory: String::new(),
-    })
+    .map_err(|e| e.to_string())?;
+    Ok(rt)
 }
 
 #[tauri::command]

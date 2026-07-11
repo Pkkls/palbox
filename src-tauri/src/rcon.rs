@@ -76,6 +76,29 @@ pub fn command(host: &str, port: u16, password: &str, cmd: &str) -> Result<Strin
     Ok(body)
 }
 
+/// Quick readiness probe: only a fully-started server answers the RCON auth
+/// handshake. Uses short timeouts so it's safe to call on a status-poll loop
+/// while the container is still downloading the game and RCON isn't up yet.
+pub fn ready(host: &str, port: u16, password: &str) -> bool {
+    let addr = match (host, port).to_socket_addrs().ok().and_then(|mut a| a.next()) {
+        Some(a) => a,
+        None => return false,
+    };
+    let mut stream = match TcpStream::connect_timeout(&addr, Duration::from_millis(1500)) {
+        Ok(s) => s,
+        Err(_) => return false,
+    };
+    let _ = stream.set_read_timeout(Some(Duration::from_millis(1500)));
+    let _ = stream.set_write_timeout(Some(Duration::from_millis(1500)));
+    if stream
+        .write_all(&encode(AUTH_ID, SERVERDATA_AUTH, password))
+        .is_err()
+    {
+        return false;
+    }
+    matches!(read_packet(&mut stream), Ok((id, _)) if id != -1)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

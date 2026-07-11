@@ -47,9 +47,10 @@ Friends ──▶ playit relay (UDP) ──▶ tunnel agent ──▶ Docker: Pa
 
 The tunnel agent only makes an **outbound** connection to the relay, so nothing
 listens on your router and your IP never appears anywhere. One-time setup: create
-a free playit.gg account, add a **UDP tunnel** pointing at
-`host.docker.internal:8211`, and paste the agent secret key into PalBox. After
-that the relay address is ready to share, and your friends need nothing.
+a free playit.gg account, add a **UDP tunnel** with local address `127.0.0.1:8211`,
+and paste the agent secret key into PalBox. Full walkthrough:
+[docs/TUNNEL-SETUP.md](docs/TUNNEL-SETUP.md). After that the relay address is ready
+to share, and your friends need nothing.
 
 ## Build from source
 

@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
 
   let docker = $state({ installed: false, running: false, version: "", message: "Checking Docker…" });
-  let runtime = $state({ exists: false, running: false, imageReady: false, memory: "" });
+  let runtime = $state({ exists: false, running: false, ready: false, imageReady: false, memory: "" });
   let tunnel = $state({ running: false, claimUrl: "", address: "", message: "" });
   let settings = $state(null);
   let players = $state([]);
@@ -85,8 +85,10 @@
     }
     await invoke("save_settings", { settings });
     await invoke("create_server", { settings });
-    notify("Server created and starting.");
-    if (settings.tunnelMode === "tunnel") await invoke("tunnel_start");
+    notify("Server created. First run downloads the game — this takes a few minutes.");
+    // The tunnel is turned on separately from the Safe access panel, once a
+    // playit key is set — starting it here would fail before setup and look
+    // like the server creation itself failed.
     await refreshStatus();
   }
 
@@ -222,8 +224,8 @@
         <button class={tab === "logs" ? "on" : ""} onclick={() => (tab = "logs")}>Logs</button>
       </nav>
       <div class="state">
-        <span class="dot {runtime.running ? 'up' : 'down'}"></span>
-        {runtime.running ? "Running" : "Stopped"}
+        <span class="dot {runtime.ready ? 'up' : runtime.running ? 'starting' : 'down'}"></span>
+        {runtime.ready ? "Running" : runtime.running ? "Starting…" : "Stopped"}
         {#if runtime.memory}<small>{runtime.memory}</small>{/if}
       </div>
     </aside>
@@ -233,7 +235,7 @@
         <header class="head">
           <div>
             <h1>{settings?.serverName}</h1>
-            <p class="sub">{runtime.running ? "Your server is online." : "Your server is stopped."}</p>
+            <p class="sub">{runtime.ready ? "Your server is online and joinable." : runtime.running ? "Starting up — first run downloads the game (a few minutes). Hang tight." : "Your server is stopped."}</p>
           </div>
           <div class="controls">
             {#if runtime.running}
@@ -258,10 +260,9 @@
             <p>{tunnel.message}</p>
             <button class="ghost" onclick={() => run('tunnel', () => invoke('tunnel_stop'))}>Turn off tunnel</button>
           {:else}
-            <p>Friends join through a relay, so no port is opened and your public IP stays hidden. This needs a free <b>playit.gg</b> key — a one-time setup.</p>
+            <p>Friends join through a relay, so no port is opened and your public IP stays hidden. This needs a free <b>playit.gg</b> key, a one-time setup. <button class="link" onclick={() => openUrl('https://github.com/Pkkls/palbox/blob/main/docs/TUNNEL-SETUP.md')}>Full step-by-step guide</button></p>
             <ol class="steps">
-              <li>On playit.gg, create a free account and a <b>UDP tunnel</b> pointing to <code>host.docker.internal:{settings?.port ?? 8211}</code>, then copy your agent secret key.
-                <div><button class="link" onclick={() => openUrl('https://playit.gg')}>Open playit.gg</button></div></li>
+              <li>Get a free Docker agent key at <button class="link" onclick={() => openUrl('https://playit.gg/account/agents/new-docker')}>playit.gg</button>, and add a <b>UDP tunnel</b> whose local address is <code>127.0.0.1:{settings?.port ?? 8211}</code>.</li>
               <li>Paste the secret key here:
                 <div class="row">
                   <input placeholder="playit secret key" bind:value={settings.playitSecret} />
@@ -433,6 +434,7 @@
   .state small { width: 100%; color: var(--muted); font-weight: 400; font-family: var(--mono); }
   .dot { width: 9px; height: 9px; border-radius: 50%; }
   .dot.up { background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+  .dot.starting { background: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 22%, transparent); }
   .dot.down { background: var(--muted); }
 
   main { padding: 30px 34px; max-width: 900px; }

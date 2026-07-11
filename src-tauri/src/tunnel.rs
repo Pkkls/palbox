@@ -58,8 +58,15 @@ pub fn start(secret: &str) -> Result<(), String> {
                 .into(),
         );
     }
+    // Share the game container's network namespace so the agent reaches the
+    // server on 127.0.0.1:<port> — playit's default local address. That keeps
+    // the user's tunnel setup trivial: just pick the port, no custom local IP.
+    if !crate::docker::container_running() {
+        return Err("Start your server first, then turn on the tunnel.".into());
+    }
     let _ = docker(&["rm", "-f", TUNNEL_NAME]);
     let secret_env = format!("SECRET_KEY={}", secret.trim());
+    let net = format!("container:{}", crate::config::CONTAINER_NAME);
     let (ok, _, err) = docker(&[
         "run",
         "-d",
@@ -67,10 +74,8 @@ pub fn start(secret: &str) -> Result<(), String> {
         TUNNEL_NAME,
         "--restart",
         "unless-stopped",
-        // Lets the agent reach the game server published on the host (Docker
-        // Desktop maps host.docker.internal automatically; this covers Linux).
-        "--add-host",
-        "host.docker.internal:host-gateway",
+        "--network",
+        &net,
         "-e",
         &secret_env,
         TUNNEL_IMAGE,

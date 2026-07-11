@@ -1,6 +1,6 @@
 [package]
 name = "palbox"
-version = "0.1.1"
+version = "0.1.2"
 description = "One-click Palworld dedicated server, without exposing your IP"
 authors = ["PalBox contributors"]
 edition = "2021"
