@@ -1,6 +1,6 @@
 {
   "name": "palbox",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "One-click Palworld dedicated server, without exposing your IP.",
   "type": "module",
   "scripts": {
