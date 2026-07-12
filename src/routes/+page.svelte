@@ -288,12 +288,14 @@
                 </li>
                 <li>
                   <span class="t-title">Get your agent key</span>
-                  <p>Once signed in, open this page. Give the agent any name (e.g. <code>palbox</code>) and confirm. playit shows you a long <b>secret key</b> — click to copy it.</p>
+                  <p>Once signed in, open this page and give the agent any name (e.g. <code>palbox</code>).</p>
+                  <p><b>playit then shows a grey/dark box with a command starting with <code>docker run</code>.</b> Ignore all of it except one thing: inside that line, find <code>SECRET_KEY=</code> followed by a long string of letters and numbers (it's usually highlighted). Copy <b>only that string</b> — nothing else.</p>
+                  <p><b>Do not type or run that docker command anywhere.</b> PalBox runs the tunnel for you; running it yourself creates a second, unmanaged copy. The page will say "Waiting for Connection" — that's expected and fine, just leave that page once you've copied the key.</p>
                   <button onclick={() => openUrl('https://playit.gg/account/agents/new-docker')}>Open the key page</button>
                 </li>
                 <li>
                   <span class="t-title">Paste the key here and turn on the tunnel</span>
-                  <p>Paste the key you just copied in the box below, click Save, then click "Turn on safe tunnel" (further down). Come back to playit's <b>Agents</b> page and check your agent shows a green "connected" dot before continuing.</p>
+                  <p>Paste the string you just copied in the box below and click Save. Start your server first (Overview → Start), then click "Turn on safe tunnel" (further down) — the button only works once your server is running. After that, "Waiting for Connection" on playit will turn into a green "connected" dot within a few seconds.</p>
                 </li>
                 <li>
                   <span class="t-title">Create the tunnel on playit</span>
