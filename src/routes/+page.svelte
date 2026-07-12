@@ -14,6 +14,7 @@
   let toast = $state("");
   let pulling = $state(false);
   let ready = $state(false);
+  let showTunnelTutorial = $state(false);
 
   const dockerReady = $derived(docker.installed && docker.running);
   const stage = $derived(
@@ -273,7 +274,49 @@
             <p>{tunnel.message}</p>
             <button class="ghost" onclick={() => run('tunnel', () => invoke('tunnel_stop'))}>Turn off tunnel</button>
           {:else}
-            <p>Friends join through a relay, so no port is opened and your public IP stays hidden. This needs a free <b>playit.gg</b> key, a one-time setup. <button class="link" onclick={() => openUrl('https://github.com/Pkkls/palbox/blob/main/docs/TUNNEL-SETUP.md')}>Full step-by-step guide</button></p>
+            <p>Friends join through a relay, so no port is opened and your public IP stays hidden. This needs a free <b>playit.gg</b> key, a one-time setup that takes about 5 minutes.</p>
+            <button class="link" onclick={() => (showTunnelTutorial = !showTunnelTutorial)}>
+              {showTunnelTutorial ? "Hide the step-by-step tutorial ▲" : "Show me every step, I've never done this ▼"}
+            </button>
+
+            {#if showTunnelTutorial}
+              <ol class="tutorial">
+                <li>
+                  <span class="t-title">Open playit.gg and sign up</span>
+                  <p>Click the button below. On their site, click <b>Sign up</b> and use your email. Then open your inbox and click the verification link they send you — this step is required, the tunnel won't work otherwise.</p>
+                  <button onclick={() => openUrl('https://playit.gg')}>Open playit.gg</button>
+                </li>
+                <li>
+                  <span class="t-title">Get your agent key</span>
+                  <p>Once signed in, open this page. Give the agent any name (e.g. <code>palbox</code>) and confirm. playit shows you a long <b>secret key</b> — click to copy it.</p>
+                  <button onclick={() => openUrl('https://playit.gg/account/agents/new-docker')}>Open the key page</button>
+                </li>
+                <li>
+                  <span class="t-title">Paste the key here and turn on the tunnel</span>
+                  <p>Paste the key you just copied in the box below, click Save, then click "Turn on safe tunnel" (further down). Come back to playit's <b>Agents</b> page and check your agent shows a green "connected" dot before continuing.</p>
+                </li>
+                <li>
+                  <span class="t-title">Create the tunnel on playit</span>
+                  <p>Go to <b>Tunnels → Create your first tunnel</b> and fill the form exactly like this:</p>
+                  <ul class="t-fields">
+                    <li><b>Name your tunnel:</b> anything, e.g. <code>My Palworld server</code></li>
+                    <li><b>Tunnel Type:</b> type <code>UDP</code> in the search box and pick the plain <b>UDP</b> tile (not the red "TCP+UDP" one, that's paid)</li>
+                    <li><b>Port Count:</b> leave it at <code>1</code></li>
+                    <li><b>Software Description:</b> write something real, e.g. <code>Palworld dedicated server</code> (don't type "test", playit can ban for that)</li>
+                    <li><b>Usage Confirmation:</b> type the sentence exactly as shown on screen</li>
+                    <li><b>Public Endpoint:</b> pick the <b>Free Network</b> tab</li>
+                    <li><b>Assign to Agent:</b> pick the agent with the green "connected" dot (the one you named in step 2)</li>
+                    <li><b>Origin Config:</b> Local IP <code>127.0.0.1</code>, Local Port <code>{settings?.port ?? 8211}</code></li>
+                  </ul>
+                  <p>Click <b>Create Tunnel</b>. After a few seconds playit shows a public address like <code>something.gl.at.ply.gg:12345</code>.</p>
+                </li>
+                <li>
+                  <span class="t-title">You're done</span>
+                  <p>That address is what your friends type in Palworld to join. Once your server shows "Running" here, come back and copy it from this panel.</p>
+                </li>
+              </ol>
+            {/if}
+
             <ol class="steps">
               <li>Get a free Docker agent key at <button class="link" onclick={() => openUrl('https://playit.gg/account/agents/new-docker')}>playit.gg</button>, and add a <b>UDP tunnel</b> whose local address is <code>127.0.0.1:{settings?.port ?? 8211}</code>.</li>
               <li>Paste the secret key here:
@@ -518,7 +561,21 @@
   .steps code { font-family: var(--mono); font-size: 12.5px; background: var(--bg); border: 1px solid var(--line);
     padding: 1px 5px; border-radius: 5px; }
   .steps .row { margin-top: 6px; }
-  button.link { background: transparent; border: none; color: var(--green); padding: 4px 0; font-weight: 600; }
+  button.link { background: transparent; border: none; color: var(--green); padding: 4px 0; font-weight: 600; cursor: pointer; }
+
+  .tutorial { list-style: none; margin: 10px 0 16px; padding: 0; counter-reset: tstep;
+    display: flex; flex-direction: column; gap: 4px; }
+  .tutorial > li { counter-increment: tstep; position: relative; padding: 12px 14px 14px 44px;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 6px; }
+  .tutorial > li::before { content: counter(tstep); position: absolute; left: 12px; top: 12px;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff;
+    font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .t-title { display: block; font-weight: 700; margin-bottom: 4px; }
+  .tutorial p { margin: 0 0 8px; font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+  .tutorial code { font-family: var(--mono); font-size: 12px; background: var(--surface); border: 1px solid var(--line);
+    padding: 1px 5px; border-radius: 5px; color: var(--ink); }
+  .t-fields { margin: 6px 0 8px; padding-left: 18px; display: flex; flex-direction: column; gap: 5px;
+    font-size: 13px; color: var(--muted); line-height: 1.5; }
 
   table { width: 100%; border-collapse: collapse; }
   th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
