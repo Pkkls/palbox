@@ -24,12 +24,12 @@
   // player). Curated to exclude cheat/boost mods; all links verified on Nexus.
   const NEXUS = "https://www.nexusmods.com/palworld/mods/";
   const recommendedMods = [
-    { name: "MapUnlocker", tag: "Map", id: "16", desc: "Reveals the full map from the start so you can plan routes. You still unlock fast-travel points normally." },
-    { name: "Pal Analyzer", tag: "Interface", id: "336", desc: "Shows a Pal's stats, passive skills and work suitability at a glance." },
-    { name: "No Food Decay", tag: "Comfort", id: "89", desc: "Stored food stops spoiling, so no more pantry micromanagement." },
-    { name: "Remove Flying Stamina Cost", tag: "Comfort", id: "13", desc: "Flying mounts no longer drain stamina, for smoother exploration." },
-    { name: "AlwaysFastTravel", tag: "Convenience", id: "96", desc: "Fast travel from anywhere, not only from unlocked statues." },
-    { name: "Ghibli Style Preset", tag: "Visual", id: "2", desc: "A softer, Ghibli-like colour palette. Pure visual comfort." },
+    { name: "MapUnlocker", tag: "Map", icon: "🗺️", id: "16", desc: "Reveals the full map from the start so you can plan routes. You still unlock fast-travel points normally." },
+    { name: "Pal Analyzer", tag: "Interface", icon: "📊", id: "336", desc: "Shows a Pal's stats, passive skills and work suitability at a glance." },
+    { name: "No Food Decay", tag: "Comfort", icon: "🍖", id: "89", desc: "Stored food stops spoiling, so no more pantry micromanagement." },
+    { name: "Remove Flying Stamina Cost", tag: "Comfort", icon: "🪶", id: "13", desc: "Flying mounts no longer drain stamina, for smoother exploration." },
+    { name: "AlwaysFastTravel", tag: "Convenience", icon: "🚀", id: "96", desc: "Fast travel from anywhere, not only from unlocked statues." },
+    { name: "Ghibli Style Preset", tag: "Visual", icon: "🎨", id: "2", desc: "A softer, Ghibli-like colour palette. Pure visual comfort." },
   ];
 
   function notify(msg) {
@@ -369,7 +369,10 @@
         <div class="mods">
           {#each recommendedMods as mod}
             <div class="mod">
-              <div class="mod-top"><span class="mod-name">{mod.name}</span><span class="mod-tag">{mod.tag}</span></div>
+              <div class="mod-top">
+                <span class="mod-name"><span class="mod-icon">{mod.icon}</span>{mod.name}</span>
+                <span class="mod-tag">{mod.tag}</span>
+              </div>
               <p class="mod-desc">{mod.desc}</p>
               <button class="link" onclick={() => openUrl(NEXUS + mod.id)}>View on Nexus →</button>
             </div>
@@ -409,7 +412,10 @@
   .spinner { width: 34px; height: 34px; border: 3px solid var(--line); border-top-color: var(--green);
     border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner, .dot.starting { animation: none; }
+    .mod { transition: none; }
+  }
 
   .gate, .wizard { max-width: 560px; background: var(--surface); border: 1px solid var(--line);
     border-radius: 18px; padding: 34px; box-shadow: 0 12px 40px rgba(0,0,0,.08); }
@@ -469,7 +475,11 @@
   .state small { width: 100%; color: var(--muted); font-weight: 400; font-family: var(--mono); }
   .dot { width: 9px; height: 9px; border-radius: 50%; }
   .dot.up { background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
-  .dot.starting { background: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 22%, transparent); }
+  .dot.starting { background: var(--warn); animation: pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--warn) 45%, transparent); }
+    50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--warn) 6%, transparent); }
+  }
   .dot.down { background: var(--muted); }
 
   main { padding: 30px 34px; max-width: 900px; }
@@ -485,13 +495,18 @@
   .sub2 { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
   .mods { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .mod { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px;
-    display: flex; flex-direction: column; gap: 8px; }
+    display: flex; flex-direction: column; gap: 8px;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
+  .mod:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.10);
+    border-color: color-mix(in srgb, var(--green) 40%, var(--line)); }
   .mod-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .mod-name { font-weight: 700; }
+  .mod-name { font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+  .mod-icon { font-size: 16px; line-height: 1; }
   .mod-tag { font-family: var(--mono); font-size: 11px; color: var(--green); background: var(--green-soft);
     padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
   .mod-desc { margin: 0; font-size: 13.5px; color: var(--muted); flex: 1; }
   .mod .link { align-self: flex-start; padding: 0; }
+  .mod .link:hover { text-decoration: underline; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .row.end { justify-content: space-between; margin-top: 16px; }
   .row input { flex: 1; min-width: 160px; }
